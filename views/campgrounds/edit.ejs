@@ -2,19 +2,19 @@
     <div class="row">
         <h1 class="text-center">New Campground</h1>
         <div class="col-6 offset-3">
-            <form action="/campgrounds/<%= campground._id %>?_method=PUT" method="POST">
+            <form action="/campgrounds/<%= campground._id %>?_method=PUT" method="POST" novalidate class="form-validate">
                     <div class="mb-3">
                         <label for="title" class="form-label" >Title</label>
-                        <input type="text" id="title" name="campground[title]" class="form-control" placeholder="" value="<%= campground.title %>">
+                        <input type="text" id="title" name="campground[title]" class="form-control" placeholder="" value="<%= campground.title %>" required>
                     </div>
                     <div class="mb-3">
                         <label for="location" class="form-label" >Location</label>
-                        <input type="text" id="location" name="campground[location]" class="form-control" placeholder="" value="<%= campground.location %>">
+                        <input type="text" id="location" name="campground[location]" class="form-control" placeholder="" value="<%= campground.location %>" required>
                     </div>
                     
                     <div class="mb-3">
                         <label for="image" class="form-label" >Image URL</label>
-                        <input type="text" id="image" name="campground[image]" class="form-control" placeholder="" value="<%= campground.image %>">
+                        <input type="text" id="image" name="campground[image]" class="form-control" placeholder="" value="<%= campground.image %>" required>
                     </div>
                     <div class="mb-3">
                         <label for="decription" class="form-label" >Description</label>
