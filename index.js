@@ -7,6 +7,9 @@ const ExpressError = require('./utils/ExpressError')
 const ejsMate = require('ejs-mate');
 const methodOverride = require("method-override");
 const {campgroundValidateSchema} = require("./schemas.js");
+const {reviewValidateSchema} = require("./schemas.js");
+const Review = require("./models/review");
+const campground = require('./models/campground');
 
 mongoose.connect('mongodb://127.0.0.1:27017/yelpcamp').then(() =>{
     console.log("Connection successfull !!");
@@ -44,6 +47,19 @@ const ValidateCampground = (req,res,next) =>{
     }
 };
 
+const ValidateReview = (req,res,next) =>{
+
+    const {error} = reviewValidateSchema.validate(req.body);
+    console.log(error);
+    if (error){
+        const msg = error.details.map(el => el.message).join(',');
+        throw new ExpressError(msg,400);
+    }
+    else{
+        next();
+    }
+};
+
 app.get("/",(req,res) => {
     res.render('home');
 });
@@ -59,13 +75,29 @@ app.post("/campgrounds", ValidateCampground, catchAsync(async (req,res,next) => 
     
 }));
 
+app.post("/campgrounds/:id/reviews", ValidateReview , catchAsync(async (req,res) => {
+    const campground = await Campground.findById(req.params.id);
+    const review = new Review(req.body.review);
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${req.params.id}`)
+}));
+
+app.delete("/campgrounds/:id/reviews/:reviewid", catchAsync(async (req,res) => {
+    const {id, reviewid} = req.params;
+    await campground.findByIdAndUpdate(id, {$pull:{reviews:reviewid}});
+    await Review.findByIdAndDelete(reviewid);
+    res.redirect(`/campgrounds/${id}`);
+}));
+
 app.get("/campgrounds", catchAsync(async (req,res) => {
     const campgrounds=await Campground.find({});
     res.render('campgrounds/index',{campgrounds});
 }));
 
 app.get("/campgrounds/:id", catchAsync(async (req,res) => {
-    const campground = await Campground.findById(req.params.id); 
+    const campground = await Campground.findById(req.params.id).populate('reviews'); 
     res.render('campgrounds/show',{campground});
 }));
 
