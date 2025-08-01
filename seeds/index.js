@@ -17,11 +17,12 @@ const seedDB = async() => {
     await Campground.deleteMany({});
     for (let i =0; i< 50 ;i++){
         const rand1000 = Math.floor(Math.random() * 1000);
+        imageid= `https://picsum.photos/seed/${rand1000}/200/300`;
         const price = Math.floor(Math.random() * 20) +10;
         const camp =new Campground({
             location :`${cities[rand1000].city}, ${cities[rand1000].state}`,
             title:`${sample(descriptors)} ${sample(places)}`,
-            image: `https://picsum.photos/400?random=${Math.random()}`,
+            image: `${imageid}`,
             description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
             price: price
             });
@@ -34,5 +35,3 @@ const seedDB = async() => {
 seedDB().then( () => {
     mongoose.connection.close();
 });
-
-seedDB();
