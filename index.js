@@ -9,10 +9,16 @@ const methodOverride = require("method-override");
 const {campgroundValidateSchema} = require("./schemas.js");
 const {reviewValidateSchema} = require("./schemas.js");
 const Review = require("./models/review");
-
+const session = require('express-session');
+const flash = require('connect-flash');
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const User = require('./models/user');
 
 const campgrounds= require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
+const users = require('./routes/users');
+const { isLoggedIn } = require('./middleware');
 
 mongoose.connect('mongodb://127.0.0.1:27017/yelpcamp').then(() =>{
     console.log("Connection successfull !!");
@@ -21,10 +27,11 @@ mongoose.connect('mongodb://127.0.0.1:27017/yelpcamp').then(() =>{
 });
 
 const db = mongoose.connection;
-
 const app =express();
 
-
+app.listen(3000, ()=>{
+    console.log("Running on port 3000")
+});
 
 app.engine("ejs",ejsMate);
 app.set('view engine', 'ejs');
@@ -32,16 +39,48 @@ app.set('views', path.join(__dirname,'views'));
 
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride('_method'));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(flash());
 
-app.listen(3000, ()=>{
-    console.log("Running on port 3000")
+const sessionConfig = { 
+    secret : "thisisasecretchangeit",
+    resave : false,
+    saveUninitialized : true,
+    cookie : {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
+        maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+    }
+};
+
+app.use(session(sessionConfig));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+
+app.use((req, res, next) => {
+    console.log(req.session);
+    res.locals.currentUser = req.user;
+    res.locals.success = req.flash('success');      
+    res.locals.error = req.flash('error');
+    next();
+});
+
+app.get('/fakeUser', async (req, res) => {
+    const user = new User({email: 'fake@example.com', username: 'fakeUser'});
+    const registeredUser = await User.register(user, 'password');
+    res.send(registeredUser);
 });
 
 
-
-
+app.use('/', users);
 app.use('/campgrounds', campgrounds);
-
 app.use('/campgrounds/:id/reviews', reviews);
 
 app.get("/",(req,res) => {
@@ -50,7 +89,6 @@ app.get("/",(req,res) => {
 
 
 app.all('*', (req, res, next) =>{
-
     next(new ExpressError("Page not found", 404));
 })
 
