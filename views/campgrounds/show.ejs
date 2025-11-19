@@ -1,4 +1,6 @@
 <% layout("layouts/boilerplate") %>
+<link rel="stylesheet" href="/stylesheets/starrating.css">
+
     <div class="row">
         <div class="col-6">
             <div class="card" style="width: 30rem;">
@@ -24,23 +26,45 @@
             </div>   
         </div>
         <% if (currentUser) { %>
-            <div class="col-6">
-                <form action="/campgrounds/<%= campground._id%>/reviews" method="POST" novalidate class="mb-3 form-validate" >
-                    <div class="mb-3" style="width: 30rem;">
-                        <label class="form-label" for="body">Rating</label>
-                        <input class="form-range" type="range" name="review[rating]" id="rating" min="1" max="5">
-                    </div>
-                    <div class="mb-3" style="width: 30rem;">
-                        <label class="form-label" for="body">Review</label>
-                        <textarea class="form-control w-100" name="review[body]" id="body" cols="10" rows="3" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-success">Submit</button>
-                </form>
+                <div class="col-6">
+                    <form action="/campgrounds/<%= campground._id%>/reviews" method="POST" novalidate class="mb-3 form-validate" >
+                        <!-- <div class="mb-3" style="width: 30rem;">
+                            <label class="form-label" for="body">Rating</label>
+                            <input class="form-range" type="range" name="review[rating]" id="rating" min="1" max="5">
+                        </div> -->
+                        <div>
+                            <h5>Leave a Review</h5>
+                            <fieldset class="starability-basic">
+                                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+                                <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                                <label for="first-rate1" title="Terrible">1 star</label>
+                                <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                                <label for="first-rate2" title="Not good">2 stars</label>
+                                <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                                <label for="first-rate3" title="Average">3 stars</label>
+                                <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                                <label for="first-rate4" title="Very good">4 stars</label>
+                                <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                                <label for="first-rate5" title="Amazing">5 stars</label>
+                            </fieldset>
+                            <div class="mb-3" style="width: 30rem;">
+                                <label class="form-label" for="body">Review</label>
+                                <textarea class="form-control w-100" name="review[body]" id="body" cols="10" rows="3" required></textarea>
+                            </div>
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary">Submit Review</button>    
+                        </div>
+                    </form>
                 <div>
+
                     <% for (let review of campground.reviews) { %>
                     <div class="card mb-3" style="width: 30rem;">
                         <div class="card-body">
-                            <h6 class="card-title">Review: <%= review.rating %></h6>
+                            <!-- <h6 class="card-title">Review: <%= review.rating %></h6> -->
+                                <p class="starability-result" data-rating="<%= review.rating %>">
+                                    Rated: <%= review.rating %> stars
+                                </p>
+
                             <h6 class="card-subtitle mb-2 text-body-secondary">Submitted by: <%= review.author.username %></h6>
                             <p class="card-text">Body: <%= review.body %></p>
                             <% if (currentUser && currentUser._id.equals(review.author._id)) { %>
