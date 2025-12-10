@@ -1,5 +1,25 @@
 
 <% layout("layouts/boilerplate") %>
+
+<link rel="stylesheet" href="/stylesheets/app.css">
+<div id="cluster-map"></div>
+
+<%- "<script>" %>
+const maptilerApiKey = "<%- process.env.MAPTILER_API_KEY %>";
+const campgrounds = {
+  type: "FeatureCollection",
+  features: <%- JSON.stringify(
+    campgrounds.map(campground => ({
+      type: "Feature",
+      geometry: campground.geometry,
+      properties: { popUpMarkup: campground?.properties?.popUpMarkup }
+    }))
+  ) %>
+};
+<%- "</script>" %>
+
+<script src="/javascript/clusterMap.js"></script>
+
 <h1>CAMPGROUNDS</h1>
 
 <ul>
