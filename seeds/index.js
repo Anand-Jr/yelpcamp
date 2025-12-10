@@ -23,7 +23,13 @@ const seedDB = async() => {
             author: "68d55353cf6f1907e49f80e8",
             location :`${cities[rand1000].city}, ${cities[rand1000].state}`,
             title:`${sample(descriptors)} ${sample(places)}`,
-            image: `${imageid}`,
+            images: [
+                {
+                    url: `${imageid}`,
+                    filename: `YelpCamp/${price}`,
+
+                 }
+            ],
             description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s",
             price: price
             });
