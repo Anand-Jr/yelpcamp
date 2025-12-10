@@ -2,8 +2,6 @@ if (process.env.NODE_ENV !== "production"){
     require('dotenv').config();
 }
 
-console.log(process.env.CLOUD_KEY);
-
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -25,6 +23,9 @@ const campgrounds= require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
 const users = require('./routes/users');
 const { isLoggedIn } = require('./middleware');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+
 
 mongoose.connect('mongodb://127.0.0.1:27017/yelpcamp').then(() =>{
     console.log("Connection successfull !!");
@@ -46,14 +47,62 @@ app.set('views', path.join(__dirname,'views'));
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(mongoSanitize());
 app.use(flash());
 
-const sessionConfig = { 
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+    "https://cdn.maptiler.com/",
+];
+
+const styleSrcUrls = [
+    "https://kit-free.fontawesome.com/",
+    "https://stackpath.bootstrapcdn.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+    "https://cdn.jsdelivr.net",
+    "https://cdn.maptiler.com/",
+];
+
+const connectSrcUrls = [
+    "https://api.maptiler.com/",
+];
+
+const imgSrcUrls = [
+    "https://images.unsplash.com/",
+    "https://res.cloudinary.com/",
+    "https://api.maptiler.com/",
+    "https://picsum.photos",
+    "https://*.picsum.photos"
+];
+
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: ["'self'", "blob:", "data:", ...imgSrcUrls],
+            fontSrc: ["'self'", ...styleSrcUrls],
+        },
+    })
+);
+
+
+const sessionConfig = {
+    name: "sessionconf", 
     secret : "thisisasecretchangeit",
     resave : false,
     saveUninitialized : true,
     cookie : {
         httpOnly: true,
+        //secure:true,
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7, // 7 days
         maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
     }
@@ -107,3 +156,4 @@ app.use((err, req,res,next) => {
     res.status(statusCode).render('error', {err});
     //res.send("Oh Boy, Something went wrong!")
 });
+
