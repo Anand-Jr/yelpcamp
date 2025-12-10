@@ -1,6 +1,10 @@
 const Campground = require("../models/campground");
 const catchAsync = require('../utils/CatchAsync')
 const {cloudinary} = require("../cloudinary")
+const maptilerClient = require("@maptiler/client");
+
+
+maptilerClient.config.apiKey = process.env.MAPTILER_API_KEY;
 
 
 module.exports.index = catchAsync(async (req,res) => {
@@ -13,7 +17,17 @@ module.exports.renderNewForm = async(req ,res) => {
 }
 
 module.exports.createCampground = catchAsync(async (req,res,next) => {
+
+    const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
+    // console.log(geoData);
+    if (!geoData.features?.length) {
+        req.flash('error', 'Could not geocode that location. Please try again and enter a valid location.');
+        return res.redirect('/campgrounds/new');
+    }
+
     const campground = new Campground(req.body.campground);
+    campground.geometry = geoData.features[0].geometry;
+    campground.location = geoData.features[0].place_name;
     campground.images= req.files.map(f =>({url: f.path, filename: f.filename}))
     campground.author = req.user._id;
     await campground.save();
@@ -49,8 +63,18 @@ module.exports.renderEditForm = catchAsync(async (req,res) => {
 module.exports.updateCampground = catchAsync(async (req, res)=> {
     
     const {id} = req.params
-    console.log(req.body, req.files)
+    const geoData = await maptilerClient.geocoding.forward(req.body.campground.location, { limit: 1 });
+    // console.log(geoData);
+    if (!geoData.features?.length) {
+        req.flash('error', 'Could not geocode that location. Please try again and enter a valid location.');
+        return res.redirect(`/campgrounds/${id}/edit`);
+    }
+    // console.log(req.body, req.files)
     const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground});
+    
+    campground.geometry = geoData.features[0].geometry;
+    campground.location = geoData.features[0].place_name;
+
     if (req.files && req.files.length > 0) {
         let imgs = req.files.map(f => ({url: f.path, filename: f.filename}))
         campground.images.push(...imgs);
