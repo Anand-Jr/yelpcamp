@@ -25,9 +25,10 @@ const users = require('./routes/users');
 const { isLoggedIn } = require('./middleware');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
+const db_url=process.env.db_url
+//const db_url="mongodb://127.0.0.1:27017/yelpcamp"
 
-
-mongoose.connect('mongodb://127.0.0.1:27017/yelpcamp').then(() =>{
+mongoose.connect(db_url).then(() =>{
     console.log("Connection successfull !!");
 }).catch( err => {
     console.log("Connection failed !!");
