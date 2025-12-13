@@ -147,14 +147,13 @@ app.get('/fakeUser', async (req, res) => {
     res.send(registeredUser);
 });
 
+app.get("/",(req,res) => {
+    res.render('home');
+});
 
 app.use('/', users);
 app.use('/campgrounds', campgrounds);
 app.use('/campgrounds/:id/reviews', reviews);
-
-app.get("/",(req,res) => {
-    res.render('home');
-});
 
 
 app.all('*', (req, res, next) =>{
