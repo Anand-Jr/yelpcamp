@@ -27,7 +27,7 @@ const { isLoggedIn } = require('./middleware');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 const db_url = process.env.DB_URL 
-//const db_url="mongodb://127.0.0.1:27017/yelpcamp";
+// const db_url="mongodb://127.0.0.1:27017/yelpcamp";
 
 
 mongoose.connect(db_url).then(() =>{
@@ -134,7 +134,7 @@ passport.deserializeUser(User.deserializeUser());
 
 
 app.use((req, res, next) => {
-    // console.log(req.session);  // Debugging - commented out
+    // console.log(req.session);
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');      
     res.locals.error = req.flash('error');
@@ -147,13 +147,14 @@ app.get('/fakeUser', async (req, res) => {
     res.send(registeredUser);
 });
 
-app.get("/",(req,res) => {
-    res.render('home');
-});
 
 app.use('/', users);
 app.use('/campgrounds', campgrounds);
 app.use('/campgrounds/:id/reviews', reviews);
+
+app.get("/",(req,res) => {
+    res.render('home');
+});
 
 
 app.all('*', (req, res, next) =>{
@@ -165,12 +166,8 @@ app.use((err, req,res,next) => {
     if  (!err.message){
         err.message = "Oh no somethgon went wrong!"
     }
-    
-    // Check if headers were already sent
-    if (res.headersSent) {
-        return next(err);
-    }
 
     res.status(statusCode).render('error', {err});
+    //res.send("Oh Boy, Something went wrong!")
 });
 
