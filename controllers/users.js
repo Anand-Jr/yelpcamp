@@ -4,7 +4,7 @@ module.exports.renderRegister = (req, res) => {
     res.render('users/register');
 }
 
-module.exports.register = async (req, res) => {
+module.exports.register = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
         const user = new User({ email, username });
