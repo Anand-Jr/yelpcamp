@@ -18,6 +18,7 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
+const MongoStore = require('connect-mongo');
 
 const campgrounds= require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
@@ -40,6 +41,7 @@ const app =express();
 app.listen(3000, ()=>{
     console.log("Running on port 3000")
 });
+
 
 app.engine("ejs",ejsMate);
 app.set('view engine', 'ejs');
@@ -95,10 +97,19 @@ app.use(
     })
 );
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!'
+
+const store = MongoStore.create({
+    mongoUrl: db_url,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret: secret
+    }
+});
 
 const sessionConfig = {
     name: "sessionconf", 
-    secret : "thisisasecretchangeit",
+    secret,
     resave : false,
     saveUninitialized : true,
     cookie : {
