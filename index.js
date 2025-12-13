@@ -134,7 +134,7 @@ passport.deserializeUser(User.deserializeUser());
 
 
 app.use((req, res, next) => {
-    console.log(req.session);
+    // console.log(req.session);  // Debugging - commented out
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');      
     res.locals.error = req.flash('error');
@@ -166,8 +166,12 @@ app.use((err, req,res,next) => {
     if  (!err.message){
         err.message = "Oh no somethgon went wrong!"
     }
+    
+    // Check if headers were already sent
+    if (res.headersSent) {
+        return next(err);
+    }
 
     res.status(statusCode).render('error', {err});
-    //res.send("Oh Boy, Something went wrong!")
 });
 

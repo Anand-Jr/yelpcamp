@@ -33,24 +33,40 @@ const storeReturnTo = (req, res, next) => {
 }
 
 const isAuthor = async (req, res, next) => {
-    const { id } = req.params;
-    const campground = await Campground.findById(id);
-    if (campground.author.equals(req.user._id) === false) {
-        req.flash('error', 'You do not have permission to do that!');
-        return res.redirect('/campgrounds');
+    try {
+        const { id } = req.params;
+        const campground = await Campground.findById(id);
+        if (!campground) {
+            req.flash('error', 'Cannot find that campground!');
+            return res.redirect('/campgrounds');
+        }
+        if (!campground.author.equals(req.user._id)) {
+            req.flash('error', 'You do not have permission to do that!');
+            return res.redirect('/campgrounds');
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
-    next();
 }
 
 
 const isReviewAuthor = async (req, res, next) => {
-    const {id, reviewid } = req.params;
-    const review = await Review.findById(reviewid);
-    if (review.author.equals(req.user._id) === false) {
-        req.flash('error', 'You do not have permission to do that!');
-        return res.redirect(`/campgrounds/${id}`);
+    try {
+        const {id, reviewid } = req.params;
+        const review = await Review.findById(reviewid);
+        if (!review) {
+            req.flash('error', 'Cannot find that review!');
+            return res.redirect(`/campgrounds/${id}`);
+        }
+        if (!review.author.equals(req.user._id)) {
+            req.flash('error', 'You do not have permission to do that!');
+            return res.redirect(`/campgrounds/${id}`);
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
-    next();
 }
 const ValidateReview = (req,res,next) =>{
 

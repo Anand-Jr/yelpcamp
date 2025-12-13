@@ -12,9 +12,9 @@ module.exports.index = catchAsync(async (req,res) => {
     res.render('campgrounds/index',{campgrounds});
 })
 
-module.exports.renderNewForm = async(req ,res) => {
+module.exports.renderNewForm = catchAsync(async(req ,res) => {
     res.render('campgrounds/new');
-}
+})
 
 module.exports.createCampground = catchAsync(async (req,res,next) => {
 
