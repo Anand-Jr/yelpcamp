@@ -18,7 +18,7 @@ const flash = require('connect-flash');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
-const MongoStore = require('connect-mongo');
+const MongoStore = require('connect-mongo').default;
 
 const campgrounds= require('./routes/campgrounds');
 const reviews = require('./routes/reviews');
@@ -108,6 +108,7 @@ const store = MongoStore.create({
 });
 
 const sessionConfig = {
+    store,
     name: "sessionconf", 
     secret,
     resave : false,
